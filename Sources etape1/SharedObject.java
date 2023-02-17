@@ -167,6 +167,6 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	// TODO - Ajout dans client, server et servObj
 	public void unsuscribe() {
 		this.callBack = null;
-		// Client.unsuscribe(id);
+		Client.unsubscribe(id);
 	}
 }
