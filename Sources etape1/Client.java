@@ -8,6 +8,7 @@ import java.net.*;
 public class Client extends UnicastRemoteObject implements Client_itf {
 
 	private static Map<Integer, SharedObject> objetsPartages;
+	private static Client client;
 
 	public Client() throws RemoteException {
 		super();
@@ -21,6 +22,11 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	// initialization of the client layer
 	public static void init() {
 		Client.objetsPartages = new HashMap<Integer, SharedObject>();
+		try {
+			client = new Client();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	// lookup in the name server
@@ -39,7 +45,8 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			e.printStackTrace();
 			return null;
 		}
-	}		
+	}
+	
 	
 	// binding in the name server
 	public static void register(String name, SharedObject_itf so) {
@@ -66,19 +73,45 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 			e.printStackTrace();
 			throw new ServiceConfigurationError("Echec de la création de l'objet");
 		}
-		
-		
+	}
+
+	public void callBack(int id) throws java.rmi.RemoteException {
+		SharedObject so = objetsPartages.get(id);
+		so.callBack();
 	}
 	
 /////////////////////////////////////////////////////////////
 //    Interface to be used by the consistency protocol
 ////////////////////////////////////////////////////////////
 
+	// subscribe for callback
+	public static void subscribe(int id) {
+		try {
+			Server_itf serv = (Server_itf) Naming.lookup(Server.URL);
+			serv.subscribe(id, client);
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			e.printStackTrace();
+			throw new ServiceConfigurationError("Echec lock_read Client");
+		}
+	}
+
+	// unsuscribe for callback
+	public static void unsubscribe(int id) {
+		try {
+			Server_itf serv = (Server_itf) Naming.lookup(Server.URL);
+			serv.unsubscribe(id, client);
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			e.printStackTrace();
+			throw new ServiceConfigurationError("Echec lock_read Client");
+		}
+	}
+
+
 	// request a read lock from the server
 	public static Object lock_read(int id) {
 		try {
 			Server_itf serv = (Server_itf) Naming.lookup(Server.URL);
-			return serv.lock_read(id, new Client());	
+			return serv.lock_read(id, client);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			e.printStackTrace();
 			throw new ServiceConfigurationError("Echec lock_read Client");
@@ -89,8 +122,18 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 	public static Object lock_write (int id) {
 		try {
 			Server_itf serv = (Server_itf) Naming.lookup(Server.URL);	
-			return serv.lock_write(id, new Client());
+			return serv.lock_write(id, client);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			e.printStackTrace();
+			throw new ServiceConfigurationError("Echec lock_write Client");
+		}
+	}
+
+	public static void unlock(int id) {
+		try {
+			Server_itf serv = (Server_itf) Naming.lookup(Server.URL);
+			serv.unlock(id, client);
+		} catch (RemoteException | MalformedURLException | NotBoundException e) {
 			e.printStackTrace();
 			throw new ServiceConfigurationError("Echec lock_write Client");
 		}

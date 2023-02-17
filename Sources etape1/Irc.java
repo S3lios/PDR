@@ -32,6 +32,14 @@ public class Irc extends Frame {
 			s = Client.create(new Sentence());
 			Client.register("IRC", s);
 		}
+		s.subscribe(new CallBack() {
+
+			//Exemple - To change
+			public int cpt;
+			public void call() {
+				System.out.print(cpt++);
+			}
+		});
 		// create the graphical part
 		new Irc(s);
 	}
@@ -39,7 +47,7 @@ public class Irc extends Frame {
 	public Irc(SharedObject s) {
 	
 		setLayout(new FlowLayout());
-	
+		
 		text=new TextArea(10,60);
 		text.setEditable(false);
 		text.setForeground(Color.red);

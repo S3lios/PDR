@@ -5,6 +5,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	public Object obj;
 	public int id;
 
+	private CallBack callBack;
+
 	enum VERROU {
 		NL,
 		RLC,
@@ -73,6 +75,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 				break;
 			case WLT:
 				lock = VERROU.WLC;
+				Client.unlock(this.id);
 				break;
 			case RLT_WLC:
 				lock = VERROU.WLC;
@@ -148,5 +151,22 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			e.printStackTrace();
 		}
 		return this.obj;
+	}
+
+	public void callBack() {
+		if (callBack != null) {
+			callBack.call();
+		}
+	}
+
+	public void subscribe(CallBack callBack) {
+		this.callBack = callBack;
+		Client.subscribe(id);
+	}
+
+	// TODO - Ajout dans client, server et servObj
+	public void unsuscribe() {
+		this.callBack = null;
+		// Client.unsuscribe(id);
 	}
 }

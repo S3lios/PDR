@@ -55,6 +55,24 @@ public class Server extends UnicastRemoteObject implements Server_itf{
         ServerObject sro = servObj.get(id);
         return sro.lock_write(client);
     }
+
+    @Override
+    public void unlock(int id, Client_itf client) throws RemoteException {
+       ServerObject sro = servObj.get(id);
+       sro.unlock(client);
+    }
+
+    @Override
+    public void subscribe(int id, Client_itf client) throws RemoteException {
+        ServerObject sro = servObj.get(id);
+        sro.subscribe(client);
+    }
+
+    @Override
+    public void unsubscribe(int id, Client_itf client) throws RemoteException {
+        ServerObject sro = servObj.get(id);
+        sro.unsubscribe(client);
+    }
     
     public static void main(String[] args) {
         try {

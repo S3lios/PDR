@@ -19,6 +19,7 @@ public class ServerObject implements Remote {
 
     private Client_itf writer;
     private List<Client_itf> readers;
+    private List<Client_itf> subscribers;
 
     // constructor
 	public ServerObject(Object o, int ident){
@@ -27,6 +28,7 @@ public class ServerObject implements Remote {
         this.lock = VERROU.NL;
         this.writer = null;
         this.readers = new ArrayList<>();
+        this.subscribers = new ArrayList<>();
 	}
 
     
@@ -84,5 +86,27 @@ public class ServerObject implements Remote {
 
         return this.obj;
     }
+
+    public void unlock(Client_itf client) {
+        for (Client_itf subscriber : subscribers) {
+            if (client != subscriber) {
+                try {
+                    client.callBack(id);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     
+
+    public void subscribe(Client_itf client) {
+        if (!subscribers.contains(client)) {
+            subscribers.add(client);
+        }
+    }
+
+    public void unsubscribe(Client_itf client) {
+        subscribers.remove(client);
+    }
 }
