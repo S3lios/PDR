@@ -9,7 +9,11 @@ import java.rmi.registry.*;
 
 
 public class Irc extends Frame {
+
 	public TextArea		text;
+	public TextField	cptText;
+	public Panel		subsPanel;
+	public int 			cpt;
 	public TextField	data;
 	SharedObject		sentence;
 	static String		myName;
@@ -32,19 +36,12 @@ public class Irc extends Frame {
 			s = Client.create(new Sentence());
 			Client.register("IRC", s);
 		}
-		s.subscribe(new CallBack() {
-
-			//Exemple - To change
-			public int cpt;
-			public void call() {
-				System.out.print(cpt++);
-			}
-		});
 		// create the graphical part
 		new Irc(s);
 	}
 
 	public Irc(SharedObject s) {
+		setName(myName);
 	
 		setLayout(new FlowLayout());
 		
@@ -55,16 +52,33 @@ public class Irc extends Frame {
 	
 		data=new TextField(60);
 		add(data);
-	
 		Button write_button = new Button("write");
 		write_button.addActionListener(new writeListener(this));
 		add(write_button);
 		Button read_button = new Button("read");
 		read_button.addActionListener(new readListener(this));
 		add(read_button);
+		Button subscribe_button = new Button("subscribe");
+		subscribe_button.addActionListener(new subscribeListener(this));
+		add(subscribe_button);
+		Button unsubscribe_button = new Button("unsubscribe");
+		unsubscribe_button.addActionListener(new unsubscribeListener(this));
+		add(unsubscribe_button);
 		
-		setSize(470,300);
-		text.setBackground(Color.black); 
+		subsPanel = new Panel();
+		subsPanel.setBackground(Color.BLACK);
+		add(subsPanel);
+
+
+		cptText = new TextField();
+		cptText.setEditable(false);
+		cptText.setText("0");
+
+		add(cptText);
+
+		setSize(550,300);
+		text.setBackground(Color.BLACK); 
+
 		show();
 		
 		sentence = s;
@@ -79,7 +93,6 @@ class readListener implements ActionListener {
 		irc = i;
 	}
 	public void actionPerformed (ActionEvent e) {
-		irc.text.append("Before read: " +irc.sentence.lock + "\n");
 		
 		// lock the object in read mode
 		irc.sentence.lock_read();
@@ -93,7 +106,11 @@ class readListener implements ActionListener {
 		// display the read value
 		irc.text.append(s+"\n");
 
-		irc.text.append("After read: " +irc.sentence.lock + "\n");
+		if (irc.sentence.isSubscribe()) {
+			irc.cpt = 0;
+			irc.cptText.setText("0");
+			irc.subsPanel.setBackground(Color.GREEN);
+		}
 
 	}
 }
@@ -106,10 +123,9 @@ class writeListener implements ActionListener {
 	public void actionPerformed (ActionEvent e) {
 		
 		// get the value to be written from the buffer
-        	String s = irc.data.getText();
-		irc.text.append("Before write: " +irc.sentence.lock + "\n");
+        String s = irc.data.getText();
         
-        	// lock the object in write mode
+        // lock the object in write mode
 		irc.sentence.lock_write();
 		
 		// invoke the method
@@ -119,10 +135,51 @@ class writeListener implements ActionListener {
 		// unlock the object
 		irc.sentence.unlock();
 
-		irc.text.append("After write: " +irc.sentence.lock + "\n");
+		if (irc.sentence.isSubscribe()) {
+			irc.cpt = 0;
+			irc.cptText.setText("0");
+			irc.subsPanel.setBackground(Color.GREEN);
+		}
 
 	}
 }
+
+class subscribeListener implements ActionListener {
+	Irc irc;
+
+	public subscribeListener(Irc i) {
+		irc = i;
+	}
+
+	public void actionPerformed (ActionEvent e) {
+		irc.sentence.subscribe(new CallBack() {
+			
+			@Override
+			public void call() {
+				irc.cpt++;
+				irc.cptText.setText(irc.cpt + "");
+				irc.subsPanel.setBackground(Color.ORANGE);
+			}
+			
+		});
+		irc.subsPanel.setBackground(Color.GREEN);
+	}
+}
+
+class unsubscribeListener implements ActionListener {
+	Irc irc;
+	public unsubscribeListener(Irc i) {
+		irc = i;
+	}
+
+	public void actionPerformed (ActionEvent e) {
+		irc.sentence.unsuscribe();
+		irc.cpt = 0;
+		irc.cptText.setText(irc.cpt + "");
+		irc.subsPanel.setBackground(Color.BLACK);
+	}
+}
+
 
 
 

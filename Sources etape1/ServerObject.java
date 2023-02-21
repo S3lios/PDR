@@ -89,16 +89,13 @@ public class ServerObject implements Remote {
 
     public void unlock(Client_itf client) {
         for (Client_itf subscriber : subscribers) {
-            if (client != subscriber) {
-                try {
-                    client.callBack(id);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+            try {
+                subscriber.callBack(id);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
         }
     }
-    
 
     public void subscribe(Client_itf client) {
         if (!subscribers.contains(client)) {

@@ -160,13 +160,18 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	public void subscribe(CallBack callBack) {
-		this.callBack = callBack;
-		Client.subscribe(id);
+		if (callBack != null && !isSubscribe()) {
+			this.callBack = callBack;
+			Client.subscribe(id);
+		}
 	}
 
-	// TODO - Ajout dans client, server et servObj
 	public void unsuscribe() {
-		this.callBack = null;
 		Client.unsubscribe(id);
+		this.callBack = null;
+	}
+
+	public boolean isSubscribe() {
+		return this.callBack != null;
 	}
 }
