@@ -31,6 +31,21 @@ public class ServerObject implements Remote {
         this.readers = new ArrayList<>();
         this.subscribers = new ArrayList<>();
         this.tracers = new ArrayList<>();
+
+        Thread debug = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("id: " + id + " lock: " + lock + " writer: " + writer + " readers: " + readers);
+                }
+            }
+        });
+        debug.start();
 	}
 
     
@@ -60,7 +75,6 @@ public class ServerObject implements Remote {
 
    
     public Object lock_write(Client_itf c) {
-        //System.out.println(this.readers);
         try {
             switch (lock) {
                 case NL:
@@ -90,8 +104,20 @@ public class ServerObject implements Remote {
     }
 
     public void unlock(Client_itf client, Object o) {
-        for (Client_itf subscriber : subscribers) {
+        // Enlever le client du write et l'ajouter au read et repasser en read
+        if (client.equals(writer)) {
+            writer = null;
+            readers.add(client);
+            lock = VERROU.RL;
+        }
 
+        // Mise a jour de l'objet
+        this.obj = o;
+
+        for (Client_itf subscriber : subscribers) {
+            if (subscriber.equals(client)) {
+                continue;
+            }
             // Rappel dans un thread pour ne pas bloquer le serveur
             Thread t = new Thread(new Runnable() {
                 @Override
@@ -107,6 +133,9 @@ public class ServerObject implements Remote {
         }
 
         for (Client_itf tracer : tracers) {
+            if (tracer.equals(client)) {
+                continue;
+            }
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -138,6 +167,7 @@ public class ServerObject implements Remote {
     }
 
     public void leave_track(Client_itf client) {
+        readers.add(client);
         tracers.remove(client);
     }
 }

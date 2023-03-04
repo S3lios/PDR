@@ -30,6 +30,21 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		this.obj = o;
 		this.id = ident;
 		this.lock = VERROU.NL;
+
+		Thread debug = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("id: " + id + " lock: " + lock);
+                }
+            }
+        });
+		debug.start();
 	}
 	
 	// invoked by the user program on the client node
@@ -99,6 +114,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// callback invoked remotely by the server
 	public synchronized void invalidate_reader() {
+		System.out.println("get invalidate_reader");
 		switch (lock) {
 			case RLT:
 				try {
@@ -139,6 +155,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 			callBack.call();
 		}
 	}
+
 
 	// subscribe to the object
 	public void subscribe() {
