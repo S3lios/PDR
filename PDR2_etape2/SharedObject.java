@@ -40,7 +40,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("id: " + id + " lock: " + lock);
+                    //System.out.println("id: " + id + " lock: " + lock);
                 }
             }
         });
@@ -114,7 +114,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// callback invoked remotely by the server
 	public synchronized void invalidate_reader() {
-		System.out.println("get invalidate_reader");
+		//System.out.println("get invalidate_reader");
 		switch (lock) {
 			case RLT:
 				try {

@@ -41,7 +41,7 @@ public class ServerObject implements Remote {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("id: " + id + " lock: " + lock + " writer: " + writer + " readers: " + readers);
+                    //System.out.println("id: " + id + " lock: " + lock + " writer: " + writer + " readers: " + readers);
                 }
             }
         });

@@ -191,7 +191,6 @@ class unsubscribeListener implements ActionListener {
 	}
 }
 
-// REVIEW : Auto-generated method stub
 class trackListener implements ActionListener {
 	Irc irc;
 	public trackListener(Irc i) {
