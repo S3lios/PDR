@@ -202,7 +202,7 @@ class trackListener implements ActionListener {
 			
 			@Override
 			public void call() {
-				// lock the object in read mode
+				// lock the object in read mode // passer un objet en param du Callback pour éviter de lock/unlock
 				irc.sentence.lock_read();
 		
 				// invoke the method
